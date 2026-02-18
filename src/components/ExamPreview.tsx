@@ -178,6 +178,13 @@ export default function ExamPreview({
             <div style={{ flex: 1, minWidth: 0 }}>
               {page.left.map(renderItem)}
             </div>
+            <div
+              style={{
+                width: "0.5px",
+                alignSelf: "stretch",
+                backgroundColor: "#d1d5db",
+              }}
+            />
             <div style={{ flex: 1, minWidth: 0 }}>
               {page.right.map(renderItem)}
             </div>
