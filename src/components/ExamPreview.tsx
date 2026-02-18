@@ -37,50 +37,36 @@ function paginate(images: QuestionImage[]): PageData[] {
   if (images.length === 0) return [];
 
   const pages: PageData[] = [];
-  let left: number[] = [];
-  let right: number[] = [];
-  let lH = 0;
-  let rH = 0;
+  let i = 0;
   let isFirst = true;
-  let maxH = USABLE_H - HEADER_H;
 
-  for (let i = 0; i < images.length; i++) {
-    const h = imgH(images[i]);
+  while (i < images.length) {
+    const maxH = isFirst ? USABLE_H - HEADER_H : USABLE_H;
+    const left: number[] = [];
+    const right: number[] = [];
+    let lH = 0;
+    let rH = 0;
 
-    // Try shorter column first
-    const preferLeft = lH <= rH;
-    const shortH = preferLeft ? lH : rH;
-    const tallH = preferLeft ? rH : lH;
-
-    if (shortH + h <= maxH) {
-      if (preferLeft) {
-        left.push(i);
-        lH += h;
-      } else {
-        right.push(i);
-        rH += h;
-      }
-    } else if (tallH + h <= maxH) {
-      if (preferLeft) {
-        right.push(i);
-        rH += h;
-      } else {
-        left.push(i);
-        lH += h;
-      }
-    } else {
-      pages.push({ left, right, isFirst });
-      left = [i];
-      right = [];
-      lH = h;
-      rH = 0;
-      isFirst = false;
-      maxH = USABLE_H;
+    // Fill left column first (top to bottom)
+    while (i < images.length) {
+      const h = imgH(images[i]);
+      if (lH + h > maxH && left.length > 0) break;
+      left.push(i);
+      lH += h;
+      i++;
     }
-  }
 
-  if (left.length > 0 || right.length > 0) {
+    // Then fill right column (top to bottom)
+    while (i < images.length) {
+      const h = imgH(images[i]);
+      if (rH + h > maxH && right.length > 0) break;
+      right.push(i);
+      rH += h;
+      i++;
+    }
+
     pages.push({ left, right, isFirst });
+    isFirst = false;
   }
 
   return pages;
