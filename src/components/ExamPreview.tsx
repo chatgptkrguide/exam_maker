@@ -22,55 +22,53 @@ export default function ExamPreview({
       style={{
         width: "210mm",
         minHeight: "297mm",
-        padding: "20mm 15mm",
+        padding: "12mm 12mm",
       }}
     >
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-2xl font-bold mb-1">{headerInfo.schoolName}</h1>
-        <h2 className="text-lg font-semibold mb-4">{headerInfo.examTitle}</h2>
+      {/* Header - compact */}
+      <div className="mb-2 text-center">
+        <h1 className="text-xl font-bold leading-tight">{headerInfo.schoolName}</h1>
+        <h2 className="text-sm font-semibold mb-1">{headerInfo.examTitle}</h2>
 
-        <table className="mx-auto w-full max-w-[500px] border-collapse border border-gray-800 text-sm">
+        <table className="mx-auto w-full border-collapse border border-gray-800 text-xs">
           <tbody>
             <tr>
-              <td className="border border-gray-800 px-4 py-2 font-semibold bg-gray-50 w-1/6">
+              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
                 과 목
               </td>
-              <td className="border border-gray-800 px-4 py-2 w-2/6">
+              <td className="border border-gray-800 px-2 py-1" style={{ width: "20%" }}>
                 {headerInfo.subject}
               </td>
-              <td className="border border-gray-800 px-4 py-2 font-semibold bg-gray-50 w-1/6">
+              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
                 학년/반
               </td>
-              <td className="border border-gray-800 px-4 py-2 w-2/6">
+              <td className="border border-gray-800 px-2 py-1" style={{ width: "20%" }}>
                 {headerInfo.grade}
               </td>
-            </tr>
-            <tr>
-              <td className="border border-gray-800 px-4 py-2 font-semibold bg-gray-50">
-                일 시
-              </td>
-              <td className="border border-gray-800 px-4 py-2">
-                {headerInfo.date}
-              </td>
-              <td className="border border-gray-800 px-4 py-2 font-semibold bg-gray-50">
+              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
                 시 간
               </td>
-              <td className="border border-gray-800 px-4 py-2">
+              <td className="border border-gray-800 px-2 py-1" style={{ width: "21%" }}>
                 {headerInfo.timeLimit}
               </td>
             </tr>
             <tr>
-              <td className="border border-gray-800 px-4 py-2 font-semibold bg-gray-50">
+              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
+                일 시
+              </td>
+              <td className="border border-gray-800 px-2 py-1">
+                {headerInfo.date}
+              </td>
+              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
                 출제교사
               </td>
-              <td className="border border-gray-800 px-4 py-2">
+              <td className="border border-gray-800 px-2 py-1">
                 {headerInfo.teacherName}
               </td>
-              <td className="border border-gray-800 px-4 py-2 font-semibold bg-gray-50">
+              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
                 총문항
               </td>
-              <td className="border border-gray-800 px-4 py-2">
+              <td className="border border-gray-800 px-2 py-1">
                 {headerInfo.totalQuestions}문항
               </td>
             </tr>
@@ -79,13 +77,19 @@ export default function ExamPreview({
       </div>
 
       {/* Divider */}
-      <hr className="border-t-2 border-gray-800 mb-6" />
+      <hr className="border-t-2 border-gray-800 mb-3" />
 
-      {/* Questions */}
-      <div className="space-y-6">
+      {/* Questions - 2 columns */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "10px",
+        }}
+      >
         {sortedImages.map((image, index) => (
           <div key={image.id}>
-            <p className="text-base font-bold mb-2">{index + 1}.</p>
+            <p className="text-sm font-bold mb-1">{index + 1}.</p>
             <img
               src={image.preview}
               alt={`${index + 1}번 문항`}
