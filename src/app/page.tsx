@@ -7,7 +7,7 @@ import ImageUploader from "@/components/ImageUploader";
 import ImageList from "@/components/ImageList";
 import ExamPreview from "@/components/ExamPreview";
 import { generatePdf } from "@/lib/pdf";
-import { FileDown, Loader2 } from "lucide-react";
+import { FileDown, Loader2, PenLine, Eye } from "lucide-react";
 
 export default function Home() {
   const [headerInfo, setHeaderInfo] = useState<ExamHeaderInfo>({
@@ -23,6 +23,7 @@ export default function Home() {
 
   const [images, setImages] = useState<QuestionImage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const pdfRef = useRef<HTMLDivElement | null>(null);
   const livePreviewRef = useRef<HTMLDivElement | null>(null);
 
@@ -33,14 +34,9 @@ export default function Home() {
       preview: URL.createObjectURL(file),
       order: 0,
     }));
-
-    setImages((prev) => {
-      const updated = [...prev, ...newImages].map((img, i) => ({
-        ...img,
-        order: i,
-      }));
-      return updated;
-    });
+    setImages((prev) =>
+      [...prev, ...newImages].map((img, i) => ({ ...img, order: i }))
+    );
   }, []);
 
   const handleRemove = useCallback((id: string) => {
@@ -94,26 +90,64 @@ export default function Home() {
   return (
     <div className="flex h-dvh flex-col bg-gray-50">
       {/* Top bar */}
-      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-2.5 shrink-0">
-        <h1 className="text-base font-bold text-gray-900">시험지 제작기</h1>
-        <button
-          onClick={handleDownloadPdf}
-          disabled={!hasImages || isGenerating}
-          className="hidden sm:flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {isGenerating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <FileDown className="h-4 w-4" />
+      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-2 sm:px-4 sm:py-2.5 shrink-0">
+        <h1 className="text-sm font-bold text-gray-900 sm:text-base">시험지 제작기</h1>
+
+        <div className="flex items-center gap-2">
+          {/* Mobile/Tablet tab toggle */}
+          {hasImages && (
+            <div className="flex rounded-lg border border-gray-200 p-0.5 md:hidden">
+              <button
+                onClick={() => setMobileTab("edit")}
+                className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                  mobileTab === "edit"
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-500"
+                }`}
+              >
+                <PenLine className="h-3 w-3" />
+                편집
+              </button>
+              <button
+                onClick={() => setMobileTab("preview")}
+                className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                  mobileTab === "preview"
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-500"
+                }`}
+              >
+                <Eye className="h-3 w-3" />
+                미리보기
+              </button>
+            </div>
           )}
-          {isGenerating ? "생성 중..." : "PDF 다운로드"}
-        </button>
+
+          <button
+            onClick={handleDownloadPdf}
+            disabled={!hasImages || isGenerating}
+            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40 sm:gap-2 sm:px-4 sm:text-sm"
+          >
+            {isGenerating ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
+            ) : (
+              <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            )}
+            <span className="hidden xs:inline">
+              {isGenerating ? "생성 중..." : "PDF 다운로드"}
+            </span>
+            <span className="xs:hidden">PDF</span>
+          </button>
+        </div>
       </header>
 
-      {/* Main split layout */}
+      {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left panel - Editor */}
-        <div className="flex w-full flex-col overflow-y-auto border-r border-gray-200 bg-white p-4 lg:w-[420px] lg:shrink-0">
+        {/* Left panel - Editor (hidden on mobile when preview tab active) */}
+        <div
+          className={`flex w-full flex-col overflow-y-auto bg-white p-3 sm:p-4 md:w-[380px] md:shrink-0 md:border-r md:border-gray-200 lg:w-[420px] ${
+            mobileTab === "preview" && hasImages ? "hidden md:flex" : "flex"
+          }`}
+        >
           <div className="space-y-3">
             <ExamHeader headerInfo={headerInfo} onChange={setHeaderInfo} />
 
@@ -133,12 +167,18 @@ export default function Home() {
         </div>
 
         {/* Right panel - Live preview */}
-        <div className="hidden flex-1 overflow-auto bg-gray-100 p-6 lg:block">
+        <div
+          className={`flex-1 overflow-auto bg-gray-100 p-3 sm:p-6 ${
+            mobileTab === "preview" && hasImages
+              ? "flex"
+              : "hidden md:flex"
+          }`}
+        >
           {hasImages ? (
-            <div className="mx-auto" style={{ width: "fit-content" }}>
+            <div className="mx-auto w-full flex justify-center">
               <div
-                className="overflow-hidden rounded-lg shadow-lg"
-                style={{ transform: "scale(0.55)", transformOrigin: "top center" }}
+                className="overflow-hidden rounded-lg shadow-lg origin-top"
+                style={{ transform: "scale(var(--preview-scale, 0.55))" }}
               >
                 <ExamPreview
                   headerInfo={headerInfo}
@@ -148,15 +188,15 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center">
+            <div className="flex h-full w-full items-center justify-center">
               <div className="text-center">
-                <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
-                  <FileDown className="h-7 w-7 text-gray-400" />
+                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-200 sm:h-16 sm:w-16">
+                  <FileDown className="h-6 w-6 text-gray-400 sm:h-7 sm:w-7" />
                 </div>
-                <p className="text-sm text-gray-400">
-                  왼쪽에서 사진을 추가하면
+                <p className="text-xs text-gray-400 sm:text-sm">
+                  사진을 추가하면
                   <br />
-                  시험지 미리보기가 표시됩니다
+                  미리보기가 표시됩니다
                 </p>
               </div>
             </div>
@@ -172,25 +212,6 @@ export default function Home() {
           previewRef={pdfRef}
         />
       </div>
-
-      {/* Mobile bottom bar */}
-      {hasImages && (
-        <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:hidden shrink-0">
-          <span className="text-sm text-gray-500">{images.length}문항</span>
-          <button
-            onClick={handleDownloadPdf}
-            disabled={isGenerating}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-40"
-          >
-            {isGenerating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <FileDown className="h-4 w-4" />
-            )}
-            {isGenerating ? "생성 중..." : "PDF 다운로드"}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
