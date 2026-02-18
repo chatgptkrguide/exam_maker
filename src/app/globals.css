@@ -1,26 +1,40 @@
 @import "tailwindcss";
 
+@custom-variant xs (@media (min-width: 480px));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --preview-scale: 0.35;
+  --preview-scale: 0.32;
+}
+
+@media (min-width: 480px) {
+  :root {
+    --preview-scale: 0.38;
+  }
 }
 
 @media (min-width: 768px) {
   :root {
-    --preview-scale: 0.45;
+    --preview-scale: 0.42;
   }
 }
 
 @media (min-width: 1024px) {
   :root {
-    --preview-scale: 0.5;
+    --preview-scale: 0.48;
   }
 }
 
 @media (min-width: 1280px) {
   :root {
     --preview-scale: 0.55;
+  }
+}
+
+@media (min-width: 1536px) {
+  :root {
+    --preview-scale: 0.65;
   }
 }
 
@@ -36,10 +50,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
 }
 
 .safe-area-bottom {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* Scrollbar styling for the panels */
+.panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+.panel-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.panel-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.panel-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
 }
 
 @media print {

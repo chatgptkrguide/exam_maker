@@ -42,10 +42,10 @@ export default function ExamHeader({ headerInfo, onChange }: ExamHeaderProps) {
     <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-3 py-2.5 text-left hover:bg-gray-50 transition-colors sm:px-4 sm:py-3"
+        className="flex w-full items-center justify-between px-3 py-2.5 text-left hover:bg-gray-50 active:bg-gray-100 transition-colors"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs font-semibold text-gray-900 sm:text-sm">
+          <span className="text-xs font-semibold text-gray-900 sm:text-sm whitespace-nowrap">
             시험 정보
           </span>
           {!open && (
@@ -64,10 +64,10 @@ export default function ExamHeader({ headerInfo, onChange }: ExamHeaderProps) {
       </button>
 
       {open && (
-        <div className="border-t border-gray-100 px-3 pb-3 pt-2 sm:px-4 sm:pb-4 sm:pt-3">
-          <div className="grid grid-cols-2 gap-x-2 gap-y-2 sm:gap-x-3">
+        <div className="border-t border-gray-100 px-3 pb-3 pt-2">
+          <div className="grid grid-cols-2 gap-2 xs:gap-2.5">
             {fields.map((f) => (
-              <div key={f.key}>
+              <div key={f.key} className={f.key === "teacherName" ? "col-span-2 xs:col-span-1" : ""}>
                 <label className="mb-0.5 block text-[10px] font-medium text-gray-500 sm:text-xs">
                   {f.label}
                 </label>
@@ -76,7 +76,7 @@ export default function ExamHeader({ headerInfo, onChange }: ExamHeaderProps) {
                   value={headerInfo[f.key]}
                   onChange={(e) => handleChange(f.key, e.target.value)}
                   placeholder={f.placeholder}
-                  className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-xs placeholder-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:px-2.5 sm:text-sm"
+                  className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-xs placeholder-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:text-sm"
                 />
               </div>
             ))}

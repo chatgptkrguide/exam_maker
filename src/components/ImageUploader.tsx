@@ -32,17 +32,15 @@ export default function ImageUploader({
     return (
       <div
         {...getRootProps()}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors aspect-[3/4] ${
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors aspect-[3/4] ${
           isDragActive
             ? "border-blue-500 bg-blue-50"
             : "border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 active:bg-blue-50"
         }`}
       >
         <input {...getInputProps()} />
-        <Plus className="h-6 w-6 text-gray-300 sm:h-8 sm:w-8" />
-        <span className="mt-0.5 text-[10px] text-gray-400 sm:text-xs">
-          추가
-        </span>
+        <Plus className="h-5 w-5 text-gray-300 sm:h-6 sm:w-6" />
+        <span className="mt-0.5 text-[10px] text-gray-400">추가</span>
       </div>
     );
   }
@@ -50,26 +48,26 @@ export default function ImageUploader({
   return (
     <div
       {...getRootProps()}
-      className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-10 transition-colors sm:py-12 ${
+      className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-8 transition-colors sm:py-10 ${
         isDragActive
           ? "border-blue-500 bg-blue-50"
           : "border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 active:bg-blue-50"
       }`}
     >
       <input {...getInputProps()} />
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 sm:h-14 sm:w-14">
-        <ImagePlus className="h-6 w-6 text-blue-500 sm:h-7 sm:w-7" />
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 sm:h-12 sm:w-12">
+        <ImagePlus className="h-5 w-5 text-blue-500 sm:h-6 sm:w-6" />
       </div>
       {isDragActive ? (
-        <p className="mt-3 text-xs font-medium text-blue-600 sm:text-sm">
+        <p className="mt-2.5 text-xs font-medium text-blue-600 sm:text-sm">
           여기에 놓으세요
         </p>
       ) : (
         <>
-          <p className="mt-3 text-xs font-medium text-gray-700 sm:text-sm">
+          <p className="mt-2.5 text-xs font-medium text-gray-700 sm:text-sm">
             사진을 추가하세요
           </p>
-          <p className="mt-1 text-[10px] text-gray-400 sm:text-xs">
+          <p className="mt-0.5 text-[10px] text-gray-400 sm:text-xs">
             탭하여 촬영/선택 &middot; 여러 장 가능
           </p>
         </>

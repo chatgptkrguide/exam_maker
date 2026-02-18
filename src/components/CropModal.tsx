@@ -33,23 +33,28 @@ export default function CropModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
-      <div className="flex max-h-[95vh] w-full flex-col rounded-t-2xl bg-white shadow-2xl overflow-hidden sm:max-h-[90vh] sm:max-w-2xl sm:rounded-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-6"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="flex max-h-[90dvh] w-full flex-col rounded-t-2xl bg-white shadow-2xl overflow-hidden sm:max-h-[85dvh] sm:max-w-xl sm:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5 shrink-0">
           <span className="text-sm font-semibold text-gray-900">
             이미지 자르기
           </span>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors sm:h-7 sm:w-7"
+            className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
           >
             <X className="h-4 w-4 text-gray-500" />
           </button>
         </div>
 
         {/* Crop area */}
-        <div className="flex flex-1 items-center justify-center overflow-auto bg-gray-50 p-3 sm:p-4">
+        <div className="flex flex-1 items-center justify-center overflow-auto bg-gray-50 p-3 min-h-0">
           <ReactCrop
             crop={crop}
             onChange={(c) => setCrop(c)}
@@ -59,31 +64,31 @@ export default function CropModal({
               ref={imgRef}
               src={imageSrc}
               alt="자르기"
-              style={{ maxHeight: "55vh", maxWidth: "100%" }}
+              className="max-h-[60dvh] max-w-full sm:max-h-[55dvh]"
             />
           </ReactCrop>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 safe-area-bottom">
+        <div className="flex items-center justify-between border-t border-gray-100 px-3 py-2.5 shrink-0 safe-area-bottom sm:px-4">
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+            className="flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             초기화
           </button>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             <button
               onClick={onClose}
-              className="rounded-lg border border-gray-200 px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors sm:py-2"
+              className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors"
             >
               취소
             </button>
             <button
               onClick={handleConfirm}
               disabled={!completedCrop}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-medium text-white hover:bg-blue-700 active:bg-blue-800 disabled:opacity-40 transition-colors sm:py-2"
+              className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 active:bg-blue-800 disabled:opacity-40 transition-colors"
             >
               <Check className="h-3.5 w-3.5" />
               적용

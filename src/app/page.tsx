@@ -126,19 +126,20 @@ export default function Home() {
   return (
     <div className="flex h-dvh flex-col bg-gray-50">
       {/* Top bar */}
-      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-2 sm:px-4 sm:py-2.5 shrink-0">
-        <h1 className="text-sm font-bold text-gray-900 sm:text-base">
+      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-2 shrink-0 sm:px-4">
+        <h1 className="text-sm font-bold text-gray-900 sm:text-base truncate mr-2">
           시험지 제작기
         </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Mobile tab toggle */}
           {hasImages && (
             <div className="flex rounded-lg border border-gray-200 p-0.5 md:hidden">
               <button
                 onClick={() => setMobileTab("edit")}
-                className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition-colors ${
                   mobileTab === "edit"
                     ? "bg-gray-900 text-white"
-                    : "text-gray-500"
+                    : "text-gray-500 active:bg-gray-100"
                 }`}
               >
                 <PenLine className="h-3 w-3" />
@@ -146,10 +147,10 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setMobileTab("preview")}
-                className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition-colors ${
                   mobileTab === "preview"
                     ? "bg-gray-900 text-white"
-                    : "text-gray-500"
+                    : "text-gray-500 active:bg-gray-100"
                 }`}
               >
                 <Eye className="h-3 w-3" />
@@ -160,22 +161,22 @@ export default function Home() {
           <button
             onClick={handleDownloadPdf}
             disabled={!hasImages || isGenerating}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40 sm:gap-2 sm:px-4 sm:text-sm"
+            className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40 sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-sm"
           >
             {isGenerating ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <FileDown className="h-3.5 w-3.5" />
             )}
-            {isGenerating ? "생성 중..." : "PDF"}
+            {isGenerating ? "생성 중..." : "PDF 저장"}
           </button>
         </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left panel */}
+        {/* Left panel - Editor */}
         <div
-          className={`flex w-full flex-col overflow-y-auto bg-white p-3 sm:p-4 md:w-[380px] md:shrink-0 md:border-r md:border-gray-200 lg:w-[420px] ${
+          className={`w-full flex-col overflow-y-auto panel-scroll bg-white p-3 sm:p-4 md:w-2/5 md:max-w-[420px] md:min-w-[320px] md:shrink-0 md:border-r md:border-gray-200 ${
             mobileTab === "preview" && hasImages ? "hidden md:flex" : "flex"
           }`}
         >
@@ -200,13 +201,13 @@ export default function Home() {
 
         {/* Right panel - Live preview */}
         <div
-          className={`flex-1 overflow-auto bg-gray-100 p-3 sm:p-6 ${
+          className={`flex-1 overflow-auto panel-scroll bg-gray-100 ${
             mobileTab === "preview" && hasImages ? "block" : "hidden md:block"
           }`}
         >
           {hasImages ? (
-            <div className="flex justify-center pb-6">
-              <div style={{ zoom: "var(--preview-scale, 0.55)" }}>
+            <div className="flex justify-center px-3 py-4 sm:px-6 sm:py-6">
+              <div style={{ zoom: "var(--preview-scale, 0.4)" }}>
                 <ExamPreview
                   headerInfo={headerInfo}
                   images={images}
@@ -215,12 +216,12 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
+            <div className="flex h-full w-full items-center justify-center p-4">
               <div className="text-center">
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-200 sm:h-16 sm:w-16">
-                  <FileDown className="h-6 w-6 text-gray-400 sm:h-7 sm:w-7" />
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 sm:h-14 sm:w-14">
+                  <FileDown className="h-5 w-5 text-gray-400 sm:h-6 sm:w-6" />
                 </div>
-                <p className="text-xs text-gray-400 sm:text-sm">
+                <p className="text-xs text-gray-400 sm:text-sm leading-relaxed">
                   사진을 추가하면
                   <br />
                   미리보기가 표시됩니다
@@ -231,7 +232,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hidden preview for PDF */}
+      {/* Hidden preview for PDF generation */}
       <div className="fixed" style={{ left: "-9999px", top: 0 }}>
         <ExamPreview
           headerInfo={headerInfo}
