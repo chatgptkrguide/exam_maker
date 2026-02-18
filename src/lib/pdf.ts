@@ -18,10 +18,12 @@ export async function generatePdf(
       scale: 2,
       useCORS: true,
       backgroundColor: "#ffffff",
+      logging: false,
+      removeContainer: true,
     });
 
-    const imgData = canvas.toDataURL("image/png");
-    pdf.addImage(imgData, "PNG", 0, 0, 210, 297);
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
+    pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
   }
 
   pdf.save(filename);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { ExamHeaderInfo, QuestionImage } from "@/types/exam";
 
 interface ExamPreviewProps {
@@ -47,7 +47,6 @@ function paginate(images: QuestionImage[]): PageData[] {
     let lH = 0;
     let rH = 0;
 
-    // Fill left column first (top to bottom)
     while (i < images.length) {
       const h = imgH(images[i]);
       if (lH + h > maxH && left.length > 0) break;
@@ -56,7 +55,6 @@ function paginate(images: QuestionImage[]): PageData[] {
       i++;
     }
 
-    // Then fill right column (top to bottom)
     while (i < images.length) {
       const h = imgH(images[i]);
       if (rH + h > maxH && right.length > 0) break;
@@ -72,38 +70,37 @@ function paginate(images: QuestionImage[]): PageData[] {
   return pages;
 }
 
-export default function ExamPreview({
+const Blank = ({ w }: { w: string }) => (
+  <span
+    style={{
+      display: "inline-block",
+      width: w,
+      borderBottom: "1px solid #222",
+      minHeight: "1em",
+    }}
+  />
+);
+
+const ExamPreview = memo(function ExamPreview({
   headerInfo,
   images,
   previewRef,
 }: ExamPreviewProps) {
-  const sorted = useMemo(
-    () => [...images].sort((a, b) => a.order - b.order),
-    [images]
-  );
-  const pages = useMemo(() => paginate(sorted), [sorted]);
+  const pages = useMemo(() => paginate(images), [images]);
 
-  const today = new Date().toISOString().split("T")[0];
-  const h = {
-    schoolName: headerInfo.schoolName || "OO고등학교",
-    examTitle: headerInfo.examTitle || "1학기 중간고사",
-    subject: headerInfo.subject || "과목명",
-    grade: headerInfo.grade || "학년",
-    date: headerInfo.date || today,
-    timeLimit: headerInfo.timeLimit || "50분",
-    teacherName: headerInfo.teacherName || "홍길동",
-    totalQuestions: headerInfo.totalQuestions || sorted.length,
-  };
-
-  const blank = (w: string) => (
-    <span
-      style={{
-        display: "inline-block",
-        width: w,
-        borderBottom: "1px solid #222",
-        minHeight: "1em",
-      }}
-    />
+  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const h = useMemo(
+    () => ({
+      schoolName: headerInfo.schoolName || "OO고등학교",
+      examTitle: headerInfo.examTitle || "1학기 중간고사",
+      subject: headerInfo.subject || "과목명",
+      grade: headerInfo.grade || "학년",
+      date: headerInfo.date || today,
+      timeLimit: headerInfo.timeLimit || "50분",
+      teacherName: headerInfo.teacherName || "홍길동",
+      totalQuestions: headerInfo.totalQuestions || images.length,
+    }),
+    [headerInfo, today, images.length]
   );
 
   const renderHeader = () => (
@@ -114,9 +111,11 @@ export default function ExamPreview({
       </div>
       <div className="mb-2 flex items-center justify-end gap-4 text-xs">
         <span>
-          {h.grade} &nbsp;이름: {blank("60px")}
+          {h.grade} &nbsp;이름: <Blank w="60px" />
         </span>
-        <span>번호: {blank("30px")}</span>
+        <span>
+          번호: <Blank w="30px" />
+        </span>
       </div>
       <table className="mx-auto w-full border-collapse border border-gray-800 text-xs mb-2">
         <tbody>
@@ -144,7 +143,7 @@ export default function ExamPreview({
     <div key={idx} style={{ marginBottom: `${ITEM_GAP}mm` }}>
       <p className="text-sm font-bold mb-0.5">{idx + 1}.</p>
       <img
-        src={sorted[idx].preview}
+        src={images[idx].preview}
         alt={`${idx + 1}번`}
         className="w-full h-auto"
         crossOrigin="anonymous"
@@ -200,4 +199,6 @@ export default function ExamPreview({
       ))}
     </div>
   );
-}
+});
+
+export default ExamPreview;

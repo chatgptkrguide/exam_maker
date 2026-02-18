@@ -1,33 +1,41 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { ExamHeaderInfo, QuestionImage } from "@/types/exam";
 import ExamHeader from "@/components/ExamHeader";
 import ImageUploader from "@/components/ImageUploader";
 import ImageList from "@/components/ImageList";
 import ExamPreview from "@/components/ExamPreview";
-import { generatePdf } from "@/lib/pdf";
 import { loadImageDimensions, matchBackground } from "@/lib/image";
 import { FileDown, Loader2, PenLine, Eye } from "lucide-react";
 
-export default function Home() {
-  const [headerInfo, setHeaderInfo] = useState<ExamHeaderInfo>({
-    schoolName: "",
-    examTitle: "",
-    subject: "",
-    grade: "",
-    date: "",
-    timeLimit: "",
-    teacherName: "",
-    totalQuestions: 0,
-  });
+const CropModal = lazy(() => import("@/components/CropModal"));
 
+const INITIAL_HEADER: ExamHeaderInfo = {
+  schoolName: "",
+  examTitle: "",
+  subject: "",
+  grade: "",
+  date: "",
+  timeLimit: "",
+  teacherName: "",
+  totalQuestions: 0,
+};
+
+export default function Home() {
+  const [headerInfo, setHeaderInfo] = useState<ExamHeaderInfo>(INITIAL_HEADER);
   const [images, setImages] = useState<QuestionImage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMatchingAll, setIsMatchingAll] = useState(false);
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
+  const [cropTarget, setCropTarget] = useState<QuestionImage | null>(null);
   const pdfRef = useRef<HTMLDivElement | null>(null);
   const livePreviewRef = useRef<HTMLDivElement | null>(null);
+
+  const sortedImages = useMemo(
+    () => [...images].sort((a, b) => a.order - b.order),
+    [images]
+  );
 
   const handleImagesAdd = useCallback(async (files: File[]) => {
     const newImages: QuestionImage[] = await Promise.all(
@@ -94,24 +102,38 @@ export default function Home() {
   const handleMatchAllBg = useCallback(async () => {
     setIsMatchingAll(true);
     try {
-      const updated = await Promise.all(
+      const results = await Promise.all(
         images.map(async (img) => {
-          const newPreview = await matchBackground(img.preview);
-          const dims = await loadImageDimensions(newPreview);
-          URL.revokeObjectURL(img.preview);
-          return { ...img, preview: newPreview, width: dims.width, height: dims.height };
+          try {
+            const newPreview = await matchBackground(img.preview);
+            const dims = await loadImageDimensions(newPreview);
+            URL.revokeObjectURL(img.preview);
+            return { ...img, preview: newPreview, width: dims.width, height: dims.height };
+          } catch {
+            return img;
+          }
         })
       );
-      setImages(updated);
+      setImages(results);
     } finally {
       setIsMatchingAll(false);
     }
   }, [images]);
 
+  const handleCropComplete = useCallback(
+    (croppedUrl: string) => {
+      if (!cropTarget) return;
+      handleUpdatePreview(cropTarget.id, croppedUrl);
+      setCropTarget(null);
+    },
+    [cropTarget, handleUpdatePreview]
+  );
+
   const handleDownloadPdf = async () => {
     if (!pdfRef.current) return;
     setIsGenerating(true);
     try {
+      const { generatePdf } = await import("@/lib/pdf");
       const filename = headerInfo.subject
         ? `${headerInfo.schoolName || "시험지"}_${headerInfo.subject}.pdf`
         : "시험지.pdf";
@@ -131,7 +153,6 @@ export default function Home() {
           시험지 제작기
         </h1>
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {/* Mobile tab toggle */}
           {hasImages && (
             <div className="flex rounded-lg border border-gray-200 p-0.5 md:hidden">
               <button
@@ -186,7 +207,7 @@ export default function Home() {
               <ImageUploader onImagesAdd={handleImagesAdd} />
             ) : (
               <ImageList
-                images={images}
+                images={sortedImages}
                 onRemove={handleRemove}
                 onReorder={handleReorder}
                 onImagesAdd={handleImagesAdd}
@@ -194,6 +215,7 @@ export default function Home() {
                 onUpdatePreview={handleUpdatePreview}
                 onMatchAllBg={handleMatchAllBg}
                 isMatchingAll={isMatchingAll}
+                onCropRequest={setCropTarget}
               />
             )}
           </div>
@@ -210,7 +232,7 @@ export default function Home() {
               <div style={{ zoom: "var(--preview-scale, 0.4)" }}>
                 <ExamPreview
                   headerInfo={headerInfo}
-                  images={images}
+                  images={sortedImages}
                   previewRef={livePreviewRef}
                 />
               </div>
@@ -236,10 +258,21 @@ export default function Home() {
       <div className="fixed" style={{ left: "-9999px", top: 0 }}>
         <ExamPreview
           headerInfo={headerInfo}
-          images={images}
+          images={sortedImages}
           previewRef={pdfRef}
         />
       </div>
+
+      {/* Crop modal - lazy loaded */}
+      {cropTarget && (
+        <Suspense fallback={null}>
+          <CropModal
+            imageSrc={cropTarget.preview}
+            onComplete={handleCropComplete}
+            onClose={() => setCropTarget(null)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }
