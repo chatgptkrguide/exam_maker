@@ -7,6 +7,7 @@ import ImageUploader from "@/components/ImageUploader";
 import ImageList from "@/components/ImageList";
 import ExamPreview from "@/components/ExamPreview";
 import { generatePdf } from "@/lib/pdf";
+import { loadImageDimensions, matchBackground } from "@/lib/image";
 import { FileDown, Loader2, PenLine, Eye } from "lucide-react";
 
 export default function Home() {
@@ -23,17 +24,26 @@ export default function Home() {
 
   const [images, setImages] = useState<QuestionImage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isMatchingAll, setIsMatchingAll] = useState(false);
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const pdfRef = useRef<HTMLDivElement | null>(null);
   const livePreviewRef = useRef<HTMLDivElement | null>(null);
 
-  const handleImagesAdd = useCallback((files: File[]) => {
-    const newImages: QuestionImage[] = files.map((file, index) => ({
-      id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 9)}`,
-      file,
-      preview: URL.createObjectURL(file),
-      order: 0,
-    }));
+  const handleImagesAdd = useCallback(async (files: File[]) => {
+    const newImages: QuestionImage[] = await Promise.all(
+      files.map(async (file, index) => {
+        const preview = URL.createObjectURL(file);
+        const dims = await loadImageDimensions(preview);
+        return {
+          id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 9)}`,
+          file,
+          preview,
+          order: 0,
+          width: dims.width,
+          height: dims.height,
+        };
+      })
+    );
     setImages((prev) =>
       [...prev, ...newImages].map((img, i) => ({ ...img, order: i }))
     );
@@ -60,17 +70,43 @@ export default function Home() {
     setImages(reordered);
   }, []);
 
-  const handleUpdatePreview = useCallback((id: string, newPreview: string) => {
-    setImages((prev) =>
-      prev.map((img) => {
-        if (img.id === id) {
+  const handleUpdatePreview = useCallback(
+    async (id: string, newPreview: string) => {
+      const dims = await loadImageDimensions(newPreview);
+      setImages((prev) =>
+        prev.map((img) => {
+          if (img.id === id) {
+            URL.revokeObjectURL(img.preview);
+            return {
+              ...img,
+              preview: newPreview,
+              width: dims.width,
+              height: dims.height,
+            };
+          }
+          return img;
+        })
+      );
+    },
+    []
+  );
+
+  const handleMatchAllBg = useCallback(async () => {
+    setIsMatchingAll(true);
+    try {
+      const updated = await Promise.all(
+        images.map(async (img) => {
+          const newPreview = await matchBackground(img.preview);
+          const dims = await loadImageDimensions(newPreview);
           URL.revokeObjectURL(img.preview);
-          return { ...img, preview: newPreview };
-        }
-        return img;
-      })
-    );
-  }, []);
+          return { ...img, preview: newPreview, width: dims.width, height: dims.height };
+        })
+      );
+      setImages(updated);
+    } finally {
+      setIsMatchingAll(false);
+    }
+  }, [images]);
 
   const handleDownloadPdf = async () => {
     if (!pdfRef.current) return;
@@ -91,10 +127,10 @@ export default function Home() {
     <div className="flex h-dvh flex-col bg-gray-50">
       {/* Top bar */}
       <header className="flex items-center justify-between border-b border-gray-200 bg-white px-3 py-2 sm:px-4 sm:py-2.5 shrink-0">
-        <h1 className="text-sm font-bold text-gray-900 sm:text-base">시험지 제작기</h1>
-
+        <h1 className="text-sm font-bold text-gray-900 sm:text-base">
+          시험지 제작기
+        </h1>
         <div className="flex items-center gap-2">
-          {/* Mobile/Tablet tab toggle */}
           {hasImages && (
             <div className="flex rounded-lg border border-gray-200 p-0.5 md:hidden">
               <button
@@ -121,7 +157,6 @@ export default function Home() {
               </button>
             </div>
           )}
-
           <button
             onClick={handleDownloadPdf}
             disabled={!hasImages || isGenerating}
@@ -132,17 +167,13 @@ export default function Home() {
             ) : (
               <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             )}
-            <span className="hidden xs:inline">
-              {isGenerating ? "생성 중..." : "PDF 다운로드"}
-            </span>
-            <span className="xs:hidden">PDF</span>
+            {isGenerating ? "생성 중..." : "PDF"}
           </button>
         </div>
       </header>
 
-      {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left panel - Editor (hidden on mobile when preview tab active) */}
+        {/* Left panel */}
         <div
           className={`flex w-full flex-col overflow-y-auto bg-white p-3 sm:p-4 md:w-[380px] md:shrink-0 md:border-r md:border-gray-200 lg:w-[420px] ${
             mobileTab === "preview" && hasImages ? "hidden md:flex" : "flex"
@@ -150,7 +181,6 @@ export default function Home() {
         >
           <div className="space-y-3">
             <ExamHeader headerInfo={headerInfo} onChange={setHeaderInfo} />
-
             {!hasImages ? (
               <ImageUploader onImagesAdd={handleImagesAdd} />
             ) : (
@@ -161,6 +191,8 @@ export default function Home() {
                 onImagesAdd={handleImagesAdd}
                 onClearAll={handleClearAll}
                 onUpdatePreview={handleUpdatePreview}
+                onMatchAllBg={handleMatchAllBg}
+                isMatchingAll={isMatchingAll}
               />
             )}
           </div>
@@ -169,17 +201,12 @@ export default function Home() {
         {/* Right panel - Live preview */}
         <div
           className={`flex-1 overflow-auto bg-gray-100 p-3 sm:p-6 ${
-            mobileTab === "preview" && hasImages
-              ? "flex"
-              : "hidden md:flex"
+            mobileTab === "preview" && hasImages ? "block" : "hidden md:block"
           }`}
         >
           {hasImages ? (
-            <div className="mx-auto flex justify-center pb-6">
-              <div
-                className="rounded-lg shadow-lg"
-                style={{ zoom: "var(--preview-scale, 0.55)" }}
-              >
+            <div className="flex justify-center pb-6">
+              <div style={{ zoom: "var(--preview-scale, 0.55)" }}>
                 <ExamPreview
                   headerInfo={headerInfo}
                   images={images}
@@ -204,7 +231,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hidden preview for PDF capture */}
+      {/* Hidden preview for PDF */}
       <div className="fixed" style={{ left: "-9999px", top: 0 }}>
         <ExamPreview
           headerInfo={headerInfo}

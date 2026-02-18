@@ -1,5 +1,17 @@
 import { PixelCrop } from "react-image-crop";
 
+export function loadImageDimensions(
+  src: string
+): Promise<{ width: number; height: number }> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () =>
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => resolve({ width: 1, height: 1 });
+    img.src = src;
+  });
+}
+
 export function getCroppedImage(
   image: HTMLImageElement,
   crop: PixelCrop
@@ -27,9 +39,7 @@ export function getCroppedImage(
   return new Promise((resolve) => {
     canvas.toBlob(
       (blob) => {
-        if (blob) {
-          resolve(URL.createObjectURL(blob));
-        }
+        if (blob) resolve(URL.createObjectURL(blob));
       },
       "image/png",
       1
@@ -51,7 +61,6 @@ export function matchBackground(imageSrc: string): Promise<string> {
       const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const pixels = data.data;
 
-      // Sample edge pixels to detect background color
       const samples: number[][] = [];
       const w = canvas.width;
       const h = canvas.height;
@@ -70,11 +79,12 @@ export function matchBackground(imageSrc: string): Promise<string> {
           const iLeft = (y * w + col) * 4;
           const iRight = (y * w + (w - 1 - col)) * 4;
           samples.push([pixels[iLeft], pixels[iLeft + 1], pixels[iLeft + 2]]);
-          samples.push([pixels[iRight], pixels[iRight + 1], pixels[iRight + 2]]);
+          samples.push(
+            [pixels[iRight], pixels[iRight + 1], pixels[iRight + 2]]
+          );
         }
       }
 
-      // Get median background color (more robust than average)
       const sorted = (ch: number) =>
         samples.map((s) => s[ch]).sort((a, b) => a - b);
       const mid = Math.floor(samples.length / 2);
@@ -82,13 +92,10 @@ export function matchBackground(imageSrc: string): Promise<string> {
       const bgG = sorted(1)[mid];
       const bgB = sorted(2)[mid];
 
-      // Calculate the scaling to push background toward white (255)
-      const targetR = 255, targetG = 255, targetB = 255;
-      const scaleR = bgR > 20 ? targetR / bgR : 1;
-      const scaleG = bgG > 20 ? targetG / bgG : 1;
-      const scaleB = bgB > 20 ? targetB / bgB : 1;
+      const scaleR = bgR > 20 ? 255 / bgR : 1;
+      const scaleG = bgG > 20 ? 255 / bgG : 1;
+      const scaleB = bgB > 20 ? 255 / bgB : 1;
 
-      // Apply color correction
       for (let i = 0; i < pixels.length; i += 4) {
         pixels[i] = Math.min(255, Math.round(pixels[i] * scaleR));
         pixels[i + 1] = Math.min(255, Math.round(pixels[i + 1] * scaleG));
@@ -99,9 +106,7 @@ export function matchBackground(imageSrc: string): Promise<string> {
 
       canvas.toBlob(
         (blob) => {
-          if (blob) {
-            resolve(URL.createObjectURL(blob));
-          }
+          if (blob) resolve(URL.createObjectURL(blob));
         },
         "image/png",
         1

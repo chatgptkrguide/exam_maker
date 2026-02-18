@@ -14,4 +14,6 @@ export interface QuestionImage {
   file: File;
   preview: string;
   order: number;
+  width: number;
+  height: number;
 }
