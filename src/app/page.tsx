@@ -64,6 +64,18 @@ export default function Home() {
     setImages(reordered);
   }, []);
 
+  const handleUpdatePreview = useCallback((id: string, newPreview: string) => {
+    setImages((prev) =>
+      prev.map((img) => {
+        if (img.id === id) {
+          URL.revokeObjectURL(img.preview);
+          return { ...img, preview: newPreview };
+        }
+        return img;
+      })
+    );
+  }, []);
+
   const handleDownloadPdf = async () => {
     if (!pdfRef.current) return;
     setIsGenerating(true);
@@ -114,6 +126,7 @@ export default function Home() {
                 onReorder={handleReorder}
                 onImagesAdd={handleImagesAdd}
                 onClearAll={handleClearAll}
+                onUpdatePreview={handleUpdatePreview}
               />
             )}
           </div>

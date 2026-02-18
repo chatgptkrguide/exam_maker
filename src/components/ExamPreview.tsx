@@ -27,6 +27,17 @@ export default function ExamPreview({
     totalQuestions: headerInfo.totalQuestions || sortedImages.length,
   };
 
+  const blank = (width: string) => (
+    <span
+      style={{
+        display: "inline-block",
+        width,
+        borderBottom: "1px solid #222",
+        minHeight: "1em",
+      }}
+    />
+  );
+
   return (
     <div
       ref={previewRef}
@@ -34,59 +45,60 @@ export default function ExamPreview({
       style={{
         width: "210mm",
         minHeight: "297mm",
-        padding: "12mm 12mm",
+        padding: "10mm 12mm",
       }}
     >
-      {/* Header - compact */}
-      <div className="mb-2 text-center">
+      {/* Header */}
+      <div className="mb-1 text-center">
         <h1 className="text-xl font-bold leading-tight">{h.schoolName}</h1>
         <h2 className="text-sm font-semibold mb-1">{h.examTitle}</h2>
-
-        <table className="mx-auto w-full border-collapse border border-gray-800 text-xs">
-          <tbody>
-            <tr>
-              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
-                과 목
-              </td>
-              <td className="border border-gray-800 px-2 py-1" style={{ width: "20%" }}>
-                {h.subject}
-              </td>
-              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
-                학년/반
-              </td>
-              <td className="border border-gray-800 px-2 py-1" style={{ width: "20%" }}>
-                {h.grade}
-              </td>
-              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
-                시 간
-              </td>
-              <td className="border border-gray-800 px-2 py-1" style={{ width: "21%" }}>
-                {h.timeLimit}
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
-                일 시
-              </td>
-              <td className="border border-gray-800 px-2 py-1">
-                {h.date}
-              </td>
-              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
-                출제교사
-              </td>
-              <td className="border border-gray-800 px-2 py-1">
-                {h.teacherName}
-              </td>
-              <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
-                총문항
-              </td>
-              <td className="border border-gray-800 px-2 py-1">
-                {h.totalQuestions}문항
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
+
+      {/* Student info - fill-in blanks */}
+      <div className="mb-2 flex items-center justify-end gap-4 text-xs">
+        <span>{h.grade} &nbsp;이름: {blank("60px")}</span>
+        <span>번호: {blank("30px")}</span>
+      </div>
+
+      {/* Info table */}
+      <table className="mx-auto w-full border-collapse border border-gray-800 text-xs mb-2">
+        <tbody>
+          <tr>
+            <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
+              과 목
+            </td>
+            <td className="border border-gray-800 px-2 py-1" style={{ width: "20%" }}>
+              {h.subject}
+            </td>
+            <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
+              일 시
+            </td>
+            <td className="border border-gray-800 px-2 py-1" style={{ width: "20%" }}>
+              {h.date}
+            </td>
+            <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
+              시 간
+            </td>
+            <td className="border border-gray-800 px-2 py-1" style={{ width: "21%" }}>
+              {h.timeLimit}
+            </td>
+          </tr>
+          <tr>
+            <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
+              출제교사
+            </td>
+            <td className="border border-gray-800 px-2 py-1">
+              {h.teacherName}
+            </td>
+            <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
+              총문항
+            </td>
+            <td className="border border-gray-800 px-2 py-1" colSpan={3}>
+              {h.totalQuestions}문항
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       {/* Divider */}
       <hr className="border-t-2 border-gray-800 mb-3" />
