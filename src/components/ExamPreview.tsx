@@ -15,6 +15,18 @@ export default function ExamPreview({
 }: ExamPreviewProps) {
   const sortedImages = [...images].sort((a, b) => a.order - b.order);
 
+  const today = new Date().toISOString().split("T")[0];
+  const h = {
+    schoolName: headerInfo.schoolName || "OO고등학교",
+    examTitle: headerInfo.examTitle || "1학기 중간고사",
+    subject: headerInfo.subject || "과목명",
+    grade: headerInfo.grade || "학년",
+    date: headerInfo.date || today,
+    timeLimit: headerInfo.timeLimit || "50분",
+    teacherName: headerInfo.teacherName || "홍길동",
+    totalQuestions: headerInfo.totalQuestions || sortedImages.length,
+  };
+
   return (
     <div
       ref={previewRef}
@@ -27,8 +39,8 @@ export default function ExamPreview({
     >
       {/* Header - compact */}
       <div className="mb-2 text-center">
-        <h1 className="text-xl font-bold leading-tight">{headerInfo.schoolName}</h1>
-        <h2 className="text-sm font-semibold mb-1">{headerInfo.examTitle}</h2>
+        <h1 className="text-xl font-bold leading-tight">{h.schoolName}</h1>
+        <h2 className="text-sm font-semibold mb-1">{h.examTitle}</h2>
 
         <table className="mx-auto w-full border-collapse border border-gray-800 text-xs">
           <tbody>
@@ -37,19 +49,19 @@ export default function ExamPreview({
                 과 목
               </td>
               <td className="border border-gray-800 px-2 py-1" style={{ width: "20%" }}>
-                {headerInfo.subject}
+                {h.subject}
               </td>
               <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
                 학년/반
               </td>
               <td className="border border-gray-800 px-2 py-1" style={{ width: "20%" }}>
-                {headerInfo.grade}
+                {h.grade}
               </td>
               <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50" style={{ width: "13%" }}>
                 시 간
               </td>
               <td className="border border-gray-800 px-2 py-1" style={{ width: "21%" }}>
-                {headerInfo.timeLimit}
+                {h.timeLimit}
               </td>
             </tr>
             <tr>
@@ -57,19 +69,19 @@ export default function ExamPreview({
                 일 시
               </td>
               <td className="border border-gray-800 px-2 py-1">
-                {headerInfo.date}
+                {h.date}
               </td>
               <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
                 출제교사
               </td>
               <td className="border border-gray-800 px-2 py-1">
-                {headerInfo.teacherName}
+                {h.teacherName}
               </td>
               <td className="border border-gray-800 px-2 py-1 font-semibold bg-gray-50">
                 총문항
               </td>
               <td className="border border-gray-800 px-2 py-1">
-                {headerInfo.totalQuestions}문항
+                {h.totalQuestions}문항
               </td>
             </tr>
           </tbody>
