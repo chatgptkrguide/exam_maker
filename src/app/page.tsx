@@ -7,7 +7,7 @@ import ImageUploader from "@/components/ImageUploader";
 import ImageList from "@/components/ImageList";
 import ExamPreview from "@/components/ExamPreview";
 import { generatePdf } from "@/lib/pdf";
-import { FileDown, Eye, EyeOff } from "lucide-react";
+import { FileDown, Loader2 } from "lucide-react";
 
 export default function Home() {
   const [headerInfo, setHeaderInfo] = useState<ExamHeaderInfo>({
@@ -22,9 +22,9 @@ export default function Home() {
   });
 
   const [images, setImages] = useState<QuestionImage[]>([]);
-  const [showPreview, setShowPreview] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const previewRef = useRef<HTMLDivElement | null>(null);
+  const pdfRef = useRef<HTMLDivElement | null>(null);
+  const livePreviewRef = useRef<HTMLDivElement | null>(null);
 
   const handleImagesAdd = useCallback((files: File[]) => {
     const newImages: QuestionImage[] = files.map((file, index) => ({
@@ -53,91 +53,129 @@ export default function Home() {
     });
   }, []);
 
+  const handleClearAll = useCallback(() => {
+    setImages((prev) => {
+      prev.forEach((img) => URL.revokeObjectURL(img.preview));
+      return [];
+    });
+  }, []);
+
   const handleReorder = useCallback((reordered: QuestionImage[]) => {
     setImages(reordered);
   }, []);
 
   const handleDownloadPdf = async () => {
-    if (!previewRef.current) return;
+    if (!pdfRef.current) return;
     setIsGenerating(true);
     try {
       const filename = headerInfo.subject
-        ? `${headerInfo.schoolName}_${headerInfo.subject}_시험지.pdf`
+        ? `${headerInfo.schoolName || "시험지"}_${headerInfo.subject}.pdf`
         : "시험지.pdf";
-      await generatePdf(previewRef.current, filename);
+      await generatePdf(pdfRef.current, filename);
     } finally {
       setIsGenerating(false);
     }
   };
 
+  const hasImages = images.length > 0;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900">
-            시험지 제작기
-          </h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowPreview(!showPreview)}
-              className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-            >
-              {showPreview ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-              {showPreview ? "편집으로 돌아가기" : "미리보기"}
-            </button>
-            <button
-              onClick={handleDownloadPdf}
-              disabled={images.length === 0 || isGenerating}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <FileDown className="h-4 w-4" />
-              {isGenerating ? "생성 중..." : "PDF 다운로드"}
-            </button>
-          </div>
-        </div>
+    <div className="flex h-dvh flex-col bg-gray-50">
+      {/* Top bar */}
+      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-2.5 shrink-0">
+        <h1 className="text-base font-bold text-gray-900">시험지 제작기</h1>
+        <button
+          onClick={handleDownloadPdf}
+          disabled={!hasImages || isGenerating}
+          className="hidden sm:flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {isGenerating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileDown className="h-4 w-4" />
+          )}
+          {isGenerating ? "생성 중..." : "PDF 다운로드"}
+        </button>
       </header>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-5xl px-4 py-6">
-        {!showPreview ? (
-          <div className="space-y-6">
+      {/* Main split layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left panel - Editor */}
+        <div className="flex w-full flex-col overflow-y-auto border-r border-gray-200 bg-white p-4 lg:w-[420px] lg:shrink-0">
+          <div className="space-y-3">
             <ExamHeader headerInfo={headerInfo} onChange={setHeaderInfo} />
-            <ImageUploader onImagesAdd={handleImagesAdd} />
-            <ImageList
-              images={images}
-              onRemove={handleRemove}
-              onReorder={handleReorder}
-            />
-          </div>
-        ) : (
-          <div className="flex flex-col items-center">
-            <p className="mb-4 text-sm text-gray-500">
-              아래는 시험지 미리보기입니다. PDF 다운로드 버튼을 눌러 저장하세요.
-            </p>
-            <div className="overflow-auto rounded-lg border border-gray-200 shadow-lg">
-              <ExamPreview
-                headerInfo={headerInfo}
-                images={images}
-                previewRef={previewRef}
-              />
-            </div>
-          </div>
-        )}
-      </main>
 
-      {/* Hidden preview for PDF generation (always rendered) */}
-      {!showPreview && (
-        <div className="fixed left-[-9999px] top-0">
-          <ExamPreview
-            headerInfo={headerInfo}
-            images={images}
-            previewRef={previewRef}
-          />
+            {!hasImages ? (
+              <ImageUploader onImagesAdd={handleImagesAdd} />
+            ) : (
+              <ImageList
+                images={images}
+                onRemove={handleRemove}
+                onReorder={handleReorder}
+                onImagesAdd={handleImagesAdd}
+                onClearAll={handleClearAll}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Right panel - Live preview */}
+        <div className="hidden flex-1 overflow-auto bg-gray-100 p-6 lg:block">
+          {hasImages ? (
+            <div className="mx-auto" style={{ width: "fit-content" }}>
+              <div
+                className="overflow-hidden rounded-lg shadow-lg"
+                style={{ transform: "scale(0.55)", transformOrigin: "top center" }}
+              >
+                <ExamPreview
+                  headerInfo={headerInfo}
+                  images={images}
+                  previewRef={livePreviewRef}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
+                  <FileDown className="h-7 w-7 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-400">
+                  왼쪽에서 사진을 추가하면
+                  <br />
+                  시험지 미리보기가 표시됩니다
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Hidden preview for PDF capture */}
+      <div className="fixed" style={{ left: "-9999px", top: 0 }}>
+        <ExamPreview
+          headerInfo={headerInfo}
+          images={images}
+          previewRef={pdfRef}
+        />
+      </div>
+
+      {/* Mobile bottom bar */}
+      {hasImages && (
+        <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:hidden shrink-0">
+          <span className="text-sm text-gray-500">{images.length}문항</span>
+          <button
+            onClick={handleDownloadPdf}
+            disabled={isGenerating}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-40"
+          >
+            {isGenerating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileDown className="h-4 w-4" />
+            )}
+            {isGenerating ? "생성 중..." : "PDF 다운로드"}
+          </button>
         </div>
       )}
     </div>
