@@ -175,10 +175,10 @@ export default function Home() {
           }`}
         >
           {hasImages ? (
-            <div className="mx-auto w-full flex justify-center">
+            <div className="mx-auto flex justify-center pb-6">
               <div
-                className="overflow-hidden rounded-lg shadow-lg origin-top"
-                style={{ transform: "scale(var(--preview-scale, 0.55))" }}
+                className="rounded-lg shadow-lg"
+                style={{ zoom: "var(--preview-scale, 0.55)" }}
               >
                 <ExamPreview
                   headerInfo={headerInfo}
