@@ -73,24 +73,24 @@ export default function CropModal({
         <div className="flex items-center justify-between border-t border-gray-100 px-3 py-2.5 shrink-0 safe-area-bottom sm:px-4">
           <button
             onClick={handleReset}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors sm:px-2.5 sm:py-2 sm:text-xs"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
+            <RotateCcw className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             초기화
           </button>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2 sm:gap-1.5">
             <button
               onClick={onClose}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+              className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors sm:px-3 sm:py-2 sm:text-xs"
             >
               취소
             </button>
             <button
               onClick={handleConfirm}
               disabled={!completedCrop}
-              className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 active:bg-blue-800 disabled:opacity-40 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 active:bg-blue-800 disabled:opacity-40 transition-colors sm:px-3 sm:py-2 sm:text-xs sm:gap-1"
             >
-              <Check className="h-3.5 w-3.5" />
+              <Check className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
               적용
             </button>
           </div>

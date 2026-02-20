@@ -152,46 +152,18 @@ export default function Home() {
         <h1 className="text-sm font-bold text-gray-900 sm:text-base truncate mr-2">
           시험지 제작기
         </h1>
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {hasImages && (
-            <div className="flex rounded-lg border border-gray-200 p-0.5 md:hidden">
-              <button
-                onClick={() => setMobileTab("edit")}
-                className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition-colors ${
-                  mobileTab === "edit"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-500 active:bg-gray-100"
-                }`}
-              >
-                <PenLine className="h-3 w-3" />
-                편집
-              </button>
-              <button
-                onClick={() => setMobileTab("preview")}
-                className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition-colors ${
-                  mobileTab === "preview"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-500 active:bg-gray-100"
-                }`}
-              >
-                <Eye className="h-3 w-3" />
-                미리보기
-              </button>
-            </div>
+        <button
+          onClick={handleDownloadPdf}
+          disabled={!hasImages || isGenerating}
+          className="hidden md:flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40 shrink-0"
+        >
+          {isGenerating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileDown className="h-4 w-4" />
           )}
-          <button
-            onClick={handleDownloadPdf}
-            disabled={!hasImages || isGenerating}
-            className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40 sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-sm"
-          >
-            {isGenerating ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <FileDown className="h-3.5 w-3.5" />
-            )}
-            {isGenerating ? "생성 중..." : "PDF 저장"}
-          </button>
-        </div>
+          {isGenerating ? "생성 중..." : "PDF 저장"}
+        </button>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
@@ -253,6 +225,48 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {/* Mobile bottom bar */}
+      {hasImages && (
+        <div className="flex items-center gap-2 border-t border-gray-200 bg-white px-3 pt-2 pb-2 shrink-0 safe-area-bottom md:hidden">
+          <div className="flex flex-1 rounded-xl bg-gray-100 p-1">
+            <button
+              onClick={() => setMobileTab("edit")}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-medium transition-all ${
+                mobileTab === "edit"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-500 active:bg-gray-200"
+              }`}
+            >
+              <PenLine className="h-4 w-4" />
+              편집
+            </button>
+            <button
+              onClick={() => setMobileTab("preview")}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-medium transition-all ${
+                mobileTab === "preview"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-500 active:bg-gray-200"
+              }`}
+            >
+              <Eye className="h-4 w-4" />
+              미리보기
+            </button>
+          </div>
+          <button
+            onClick={handleDownloadPdf}
+            disabled={isGenerating}
+            className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition-colors active:bg-blue-800 disabled:opacity-40 shrink-0"
+          >
+            {isGenerating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileDown className="h-4 w-4" />
+            )}
+            {isGenerating ? "생성 중" : "저장"}
+          </button>
+        </div>
+      )}
 
       {/* Hidden preview for PDF generation */}
       <div className="fixed" style={{ left: "-9999px", top: 0 }}>

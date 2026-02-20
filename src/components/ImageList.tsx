@@ -147,6 +147,7 @@ const ImageList = memo(function ImageList({
       timer: setTimeout(() => {
         if (!touchState.current) return;
         touchState.current.active = true;
+        if (navigator.vibrate) navigator.vibrate(30);
         setDraggedIndex(index);
 
         // Create floating clone
@@ -304,9 +305,9 @@ const ImageList = memo(function ImageList({
             {/* Delete button */}
             <button
               onClick={() => onRemove(image.id)}
-              className="absolute top-1 right-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white transition-all active:bg-red-500 sm:h-5 sm:w-5 sm:opacity-0 sm:group-hover:opacity-100 sm:hover:bg-red-500"
+              className="absolute top-1 right-1 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-all active:bg-red-500 sm:h-5 sm:w-5 sm:opacity-0 sm:group-hover:opacity-100 sm:hover:bg-red-500"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
             </button>
             {/* Image */}
             <div className="relative aspect-[3/4] cursor-grab active:cursor-grabbing">
@@ -328,32 +329,32 @@ const ImageList = memo(function ImageList({
               <button
                 onClick={() => moveImage(index, "left")}
                 disabled={index === 0}
-                className="flex flex-1 items-center justify-center py-1.5 text-gray-400 hover:bg-gray-50 active:bg-gray-100 disabled:text-gray-200"
+                className="flex flex-1 items-center justify-center min-h-[44px] sm:min-h-0 sm:py-1.5 text-gray-400 hover:bg-gray-50 active:bg-gray-100 disabled:text-gray-200"
               >
-                <ChevronLeft className="h-3.5 w-3.5" />
+                <ChevronLeft className="h-5 w-5 sm:h-3.5 sm:w-3.5" />
               </button>
               <div className="w-px bg-gray-100" />
               <button
                 onClick={() => onCropRequest(image)}
-                className="flex flex-1 items-center justify-center py-1.5 text-gray-400 hover:bg-blue-50 active:bg-blue-100"
+                className="flex flex-1 items-center justify-center min-h-[44px] sm:min-h-0 sm:py-1.5 text-gray-400 hover:bg-blue-50 active:bg-blue-100"
               >
-                <Crop className="h-3.5 w-3.5" />
+                <Crop className="h-5 w-5 sm:h-3.5 sm:w-3.5" />
               </button>
               <div className="w-px bg-gray-100" />
               <button
                 onClick={() => handleMatchBg(image)}
                 disabled={processingId === image.id}
-                className="flex flex-1 items-center justify-center py-1.5 text-gray-400 hover:bg-amber-50 active:bg-amber-100 disabled:text-gray-200"
+                className="flex flex-1 items-center justify-center min-h-[44px] sm:min-h-0 sm:py-1.5 text-gray-400 hover:bg-amber-50 active:bg-amber-100 disabled:text-gray-200"
               >
-                <Sun className="h-3.5 w-3.5" />
+                <Sun className="h-5 w-5 sm:h-3.5 sm:w-3.5" />
               </button>
               <div className="w-px bg-gray-100" />
               <button
                 onClick={() => moveImage(index, "right")}
                 disabled={index === images.length - 1}
-                className="flex flex-1 items-center justify-center py-1.5 text-gray-400 hover:bg-gray-50 active:bg-gray-100 disabled:text-gray-200"
+                className="flex flex-1 items-center justify-center min-h-[44px] sm:min-h-0 sm:py-1.5 text-gray-400 hover:bg-gray-50 active:bg-gray-100 disabled:text-gray-200"
               >
-                <ChevronRight className="h-3.5 w-3.5" />
+                <ChevronRight className="h-5 w-5 sm:h-3.5 sm:w-3.5" />
               </button>
             </div>
           </div>
